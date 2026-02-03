@@ -2,13 +2,44 @@ const Movie = require('./movies');
 const express = require('express');
 const mongoose = require('mongoose');
 const connectDB = require('./db');
+const cors = require('cors');
 const app = express();
+
+// Configure CORS to allow requests from your dev tools / device
+const whitelist = [
+  'http://localhost:19006', // Expo web/devtool
+  'http://localhost:8081',  // local frontend (if used)
+  'http://127.0.0.1:19006',
+  'http://localhost:8082'   // expo/web default for some setups
+  // Add your machine IP / Expo tunnel URL here, e.g. 'exp://192.168.1.5:19000'
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // allow requests with no origin like mobile apps or curl
+    if (!origin || whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // enable pre-flight for all routes
 app.use(express.json());
 
+const PORT = process.env.PORT || 3000;
 
-connectDB().then(() => {
-  app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
-});
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+  })
+  .catch(err => {
+    console.error('Failed to connect to DB, server not started', err);
+  });
 
 app.get('/', (req, res) => {
   res.send('Hello! Your server is working.');
@@ -51,6 +82,3 @@ app.post('/movies', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
