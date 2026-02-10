@@ -3,7 +3,7 @@ const Movie = require('./movies');
 const trendignSchemea = new mongoose.Schema({
   movie: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'movie',
+    ref: 'Movie',
     required: true
   },
   expiredAt: {
