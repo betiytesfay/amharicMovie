@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Movie = require('./movies');
 const trendignSchemea = new mongoose.Schema({
   movie: {
     type: mongoose.Schema.Types.ObjectId,
@@ -11,5 +12,5 @@ const trendignSchemea = new mongoose.Schema({
   },
 
 },
-  { timestamp: true })
+  { timestamps: true })
 module.exports = mongoose.model('trending', trendignSchemea)
