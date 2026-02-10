@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const connectDB = require('./db');
 const cors = require('cors');
 const app = express();
+const trending = require('./trendingMovie')
 
 // Configure CORS to allow requests from your dev tools / device
 const whitelist = [
@@ -28,7 +29,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // enable pre-flight for all routes
+// Preflight requests are handled by the CORS middleware; explicit app.options('*') can cause path parsing issues with certain versions of path-to-regexp
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -45,7 +46,28 @@ app.get('/', (req, res) => {
   res.send('Hello! Your server is working.');
 });
 
+app.post('/trending', async (req, res) => {
+  try {
+    let movies = req.body;
+    if (!Array.isArray(movies)) {
+      movies = [movies]
+    }
+    const inserted = await trending.insertMany(movies)
+    res.status(201).json(inserted);
+  } catch (err) {
+    res.status(400).json({ message: err.message })
+  }
+})
+app.get('/trending', async (req, res) => {
+  try {
 
+    const trendingMovies = await trending.find({}).populate('movie')
+    res.json(trendingMovies)
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+
+})
 app.get('/movies', async (req, res) => {
   try {
     const movies = await Movie.find({});
